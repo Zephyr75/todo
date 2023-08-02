@@ -15,13 +15,23 @@ import (
 
 func main() {
 	tasks := make([]task.Task, 0)
-
-	// tasks = append(tasks, task.Task{"Buy milk", false, 1, "Shopping", time.Now()})
-
-	// load tasks from file
 	tasks = loadTasks()
+	
 
-	saveTasks(tasks)
+	app := tview.NewApplication()
+	list := tview.NewList()
+	list.AddItem("Add TODO", "", 'a', func () {
+			app.SetRoot(menu.AddMenu(app, list, &tasks), true)
+		}).
+		AddItem("List TODOs", "", 'l', func () {
+			app.SetRoot(menu.ListMenu(app, list, &tasks), true)
+		}).
+		AddItem("Quit", "Press to exit", 'q', func() {
+			app.Stop()
+		})
+	if err := app.SetRoot(list, true).SetFocus(list).Run(); err != nil {
+		panic(err)
+	}
 
 	for _, t := range tasks {
 		fmt.Println(t.Title)
@@ -31,20 +41,7 @@ func main() {
 		fmt.Println(t.Date)
 		fmt.Println()
 	}
-	os.Exit(0)
-
-	app := tview.NewApplication()
-	list := tview.NewList().
-		AddItem("Add TODO", "", 'a', func () {
-			app.SetRoot(menu.AddMenu(app), true)
-		}).
-		AddItem("List TODOs", "", 'l', nil).
-		AddItem("Quit", "Press to exit", 'q', func() {
-			app.Stop()
-		})
-	if err := app.SetRoot(list, true).SetFocus(list).Run(); err != nil {
-		panic(err)
-	}
+	saveTasks(tasks)
 }
 
 func loadTasks() []task.Task {
@@ -95,3 +92,5 @@ func saveTasks(tasks []task.Task) {
 			fmt.Fprintf(file, "%s %s\n\n", t.Date.Format("2006-01-02"), t.Date.Format("15:04"))
 		}
 }
+
+
