@@ -18,36 +18,41 @@ func AddMenu(app *tview.Application, list *tview.List, tasks *[]task.Task) *tvie
 			projectsStr += t.Project + "-"
 		}
 	}
-	projectsStr = projectsStr[:len(projectsStr)-1]
+	if len(projectsStr) > 0 {
+		projectsStr = projectsStr[:len(projectsStr)-1]
+	} else {
+		projectsStr = "No projects yet"
+	}
 
 	var description string
 	var importance int
 	var project string
-	var date time.Time
-	var hour time.Time
+	date, _ := time.Parse("2006-01-02", time.Now().Format("2006-01-02"))
+	hour, _ := time.Parse("15:04", time.Now().Format("15:04"))
 
-	dateInput := tview.NewInputField().SetLabel("    Due date").SetFieldWidth(20).SetText(time.Now().Format("2006-01-02")).SetChangedFunc(func(text string) {
+	dateInput := tview.NewInputField().SetLabel("    Due date").SetFieldWidth(40).SetText(time.Now().Format("2006-01-02")).SetChangedFunc(func(text string) {
 		date, _ = time.Parse("2006-01-02", text)
 	})
-	hourInput := tview.NewInputField().SetLabel("    Due hour").SetFieldWidth(20).SetText(time.Now().Format("15:04")).SetChangedFunc(func(text string) {
+	hourInput := tview.NewInputField().SetLabel("    Due hour").SetFieldWidth(40).SetText(time.Now().Format("15:04")).SetChangedFunc(func(text string) {
 		hour, _ = time.Parse("15:04", text)
 	})
 
 	return tview.NewForm().
-		AddInputField("Description", "Task", 20, nil, func(text string) {
+		AddInputField("Description", "Task", 40, nil, func(text string) {
 			description = text
 		}).
-		AddDropDown("Importance", []string{"Chill.", "Mid", "Urgent"}, 0, func(option string, optionIndex int) {
+		AddDropDown("Importance", []string{"Chill", "Mid", "Urgent"}, 0, func(option string, optionIndex int) {
 			importance = optionIndex
 		}).
 		AddTextView("Existing projects", projectsStr, 40, 1, true, false).
-		AddInputField("    Project", "", 20, nil, func(text string) {
+		AddInputField("    Project", "", 40, nil, func(text string) {
 			project = text
 		}).
 		AddCheckbox("No date", false, func(checked bool) {
 			if checked {
 				dateInput.SetText("No date assigned")
 				dateInput.SetDisabled(true)
+				date = time.Time{}
 			} else {
 				dateInput.SetText(time.Now().Format("2006-01-02"))
 				dateInput.SetDisabled(false)
@@ -58,6 +63,7 @@ func AddMenu(app *tview.Application, list *tview.List, tasks *[]task.Task) *tvie
 			if checked {
 				hourInput.SetText("No hour assigned")
 				hourInput.SetDisabled(true)
+				hour = time.Time{}
 			} else {
 				hourInput.SetText(time.Now().Format("15:04"))
 				hourInput.SetDisabled(false)
@@ -70,7 +76,7 @@ func AddMenu(app *tview.Application, list *tview.List, tasks *[]task.Task) *tvie
 			task.Done = false
 			task.Importance = importance
 			task.Project = project
-			task.Date = date.Add(hour.Sub(time.Date(0, 0, 0, 0, 0, 0, 0, time.UTC)))
+			task.Date = date.Add(time.Hour * time.Duration(hour.Hour())).Add(time.Minute * time.Duration(hour.Minute()))
 			*tasks = append(*tasks, task)
 			app.SetRoot(list, true)
 		}).

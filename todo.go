@@ -11,7 +11,6 @@ import (
 	"todo/menu"
 	"todo/task"
 
-	"github.com/gdamore/tcell/v2"
 )
 
 
@@ -21,16 +20,15 @@ func main() {
 
 	app := tview.NewApplication()
 	list := tview.NewList()
-	list.AddItem("Add TODO", "", 'a', func () {
+	list.AddItem("Add", "Add a new task", 'a', func () {
 			app.SetRoot(menu.AddMenu(app, list, &tasks), true)
 		}).
-		AddItem("List TODOs", "", 'l', func () {
+		AddItem("List", "List all tasks", 'l', func () {
 			app.SetRoot(menu.ListMenu(app, list, &tasks), true)
 		}).
-		AddItem("Quit", "", 'q', func() {
+		AddItem("Quit", "Exit program", 'q', func() {
 			app.Stop()
-		}).
-		SetSecondaryTextColor(tcell.ColorDarkSlateBlue)
+		})
 	if err := app.SetRoot(list, true).SetFocus(list).Run(); err != nil {
 		panic(err)
 	}
