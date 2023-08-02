@@ -4,6 +4,8 @@ import (
 	"github.com/rivo/tview"
 	"time"
 	"todo/task"
+
+	"github.com/gdamore/tcell/v2"
 )
 
 func AddMenu(app *tview.Application, list *tview.List, tasks *[]task.Task) *tview.Form {
@@ -13,9 +15,10 @@ func AddMenu(app *tview.Application, list *tview.List, tasks *[]task.Task) *tvie
 	for _, t := range *tasks {
 		if !contains(projects, t.Project) {
 			projects = append(projects, t.Project)
-			projectsStr += t.Project + " "
+			projectsStr += t.Project + "-"
 		}
 	}
+	projectsStr = projectsStr[:len(projectsStr)-1]
 
 	var description string
 	var importance int
@@ -73,7 +76,9 @@ func AddMenu(app *tview.Application, list *tview.List, tasks *[]task.Task) *tvie
 		}).
 		AddButton("Cancel", func() {
 			app.SetRoot(list, true)
-		})
+		}).
+		SetFieldBackgroundColor(tcell.ColorDarkSlateBlue).
+		SetButtonBackgroundColor(tcell.ColorDarkSlateBlue)
 }
 
 func contains(projects []string, project string) bool {

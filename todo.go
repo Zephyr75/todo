@@ -10,13 +10,14 @@ import (
 	"github.com/rivo/tview"
 	"todo/menu"
 	"todo/task"
+
+	"github.com/gdamore/tcell/v2"
 )
 
 
 func main() {
 	tasks := make([]task.Task, 0)
 	tasks = loadTasks()
-	
 
 	app := tview.NewApplication()
 	list := tview.NewList()
@@ -26,21 +27,14 @@ func main() {
 		AddItem("List TODOs", "", 'l', func () {
 			app.SetRoot(menu.ListMenu(app, list, &tasks), true)
 		}).
-		AddItem("Quit", "Press to exit", 'q', func() {
+		AddItem("Quit", "", 'q', func() {
 			app.Stop()
-		})
+		}).
+		SetSecondaryTextColor(tcell.ColorDarkSlateBlue)
 	if err := app.SetRoot(list, true).SetFocus(list).Run(); err != nil {
 		panic(err)
 	}
 
-	for _, t := range tasks {
-		fmt.Println(t.Title)
-		fmt.Println(t.Done)
-		fmt.Println(t.Importance)
-		fmt.Println(t.Project)
-		fmt.Println(t.Date)
-		fmt.Println()
-	}
 	saveTasks(tasks)
 }
 
@@ -87,6 +81,9 @@ func saveTasks(tasks []task.Task) {
 
 		// write to file
 		for _, t := range tasks {
+			if t.Done {
+				continue
+			}
 			fmt.Fprintf(file, "%s\n", t.Title)
 			fmt.Fprintf(file, "%t %d %s\n", t.Done, t.Importance, t.Project)
 			fmt.Fprintf(file, "%s %s\n\n", t.Date.Format("2006-01-02"), t.Date.Format("15:04"))
