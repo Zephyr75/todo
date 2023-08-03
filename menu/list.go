@@ -1,11 +1,14 @@
 package menu
 
 import (
-	"github.com/rivo/tview"
+	// "fmt"
 	"todo/task"
 
-	"github.com/gdamore/tcell/v2"
+	"github.com/rivo/tview"
+
 	"sort"
+
+	"github.com/gdamore/tcell/v2"
 )
 
 func ListMenu(app *tview.Application, list *tview.List, tasks *[]task.Task) *tview.Form {
@@ -33,7 +36,8 @@ func ListMenu(app *tview.Application, list *tview.List, tasks *[]task.Task) *tvi
 			form.AddTextView(title, "", 40, 1, true, false)
 			currentProject = newProject
 		}
-		title := "    " + (*tasks)[i].Title
+		taskTitle := (*tasks)[i].Title
+		title := "    " + taskTitle
 
 		date := (*tasks)[i].Date.Format("2006-01-02")
 		hour := (*tasks)[i].Date.Format("15:04")
@@ -55,7 +59,11 @@ func ListMenu(app *tview.Application, list *tview.List, tasks *[]task.Task) *tvi
 		}
 
 		form.AddCheckbox(title, (*tasks)[i].Done, func(checked bool) {
-			(*tasks)[i].Done = checked
+			for i := range *tasks {
+				if (*tasks)[i].Title == taskTitle {
+					(*tasks)[i].Done = checked
+				}
+			}
 		})
 	}
 	form.AddButton("Back", func() {
